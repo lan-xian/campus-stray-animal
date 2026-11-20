@@ -1,0 +1,105 @@
+<!-- frontend/pages/admin/animal-add.html -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">新增动物档案</title>
+    <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<div class="header">
+    <h2>📝 <span id="header-title">新增动物档案</span></h2>
+    <div class="user-info">
+        <span id="username-display"></span>
+        <button onclick="logout()">退出</button>
+    </div>
+</div>
+<div class="container">
+    <button style="margin-bottom:15px; padding:8px 20px; cursor:pointer; border-radius:4px; border:1px solid #ddd;" onclick="window.location.href='animal-manage.html'">← 返回</button>
+    <div class="form-box">
+        <label>暂定名字</label>
+        <input type="text" id="name" placeholder="请输入名字">
+        <label>动物类型</label>
+        <select id="type">
+            <option value="CAT">🐱 猫</option>
+            <option value="DOG">🐶 狗</option>
+        </select>
+        <label>常驻区域</label>
+        <input type="text" id="area" placeholder="如：图书馆草坪">
+        <label>封面照片</label>
+        <input type="file" id="file" accept="image/*">
+        <img id="preview" style="max-width:200px; display:none; margin-bottom:10px; border-radius:5px;">
+        <div style="margin-top:15px;">
+            <button onclick="submitForm()">保存</button>
+            <button class="cancel" onclick="window.location.href='animal-manage.html'">取消</button>
+        </div>
+        <p id="msg"></p>
+    </div>
+</div>
+<script>
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user || user.role !== 'ADMIN') { window.location.href = '../login.html'; }
+    document.getElementById('username-display').textContent = '👤 ' + user.username;
+    const authHeader = { 'Authorization': 'Basic ' + btoa(user.username + ':123456') };
+
+    const params = new URLSearchParams(window.location.search);
+    const editId = params.get('id');
+    const isEdit = !!editId;
+
+    if (isEdit) {
+        document.getElementById('page-title').textContent = '编辑动物档案';
+        document.getElementById('header-title').textContent = '编辑动物档案';
+        fetch(`http://localhost:8080/api/animals/${editId}`, { headers: authHeader })
+            .then(res => res.json())
+            .then(d => {
+                const a = d.data;
+                document.getElementById('name').value = a.name;
+                document.getElementById('type').value = a.type;
+                document.getElementById('area').value = a.area || '';
+                if (a.coverImage) {
+                    document.getElementById('preview').src = 'http://localhost:8080' + a.coverImage;
+                    document.getElementById('preview').style.display = 'block';
+                }
+            });
+    }
+
+    document.getElementById('file').addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = e => { document.getElementById('preview').src = e.target.result; document.getElementById('preview').style.display = 'block'; };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    function submitForm() {
+        const formData = new FormData();
+        formData.append('data', new Blob([JSON.stringify({
+            name: document.getElementById('name').value,
+            type: document.getElementById('type').value,
+            area: document.getElementById('area').value
+        })], { type: 'application/json' }));
+
+        const fileInput = document.getElementById('file');
+        if (fileInput.files.length > 0) {
+            formData.append('file', fileInput.files[0]);
+        }
+
+        const url = isEdit ? `http://localhost:8080/api/animals/${editId}` : 'http://localhost:8080/api/animals';
+        const method = isEdit ? 'PUT' : 'POST';
+
+        fetch(url, { method, body: formData, headers: authHeader })
+            .then(res => res.json())
+            .then(d => {
+                if (d.code === 200) {
+                    window.location.href = 'animal-manage.html';
+                } else {
+                    document.getElementById('msg').textContent = d.message;
+                }
+            });
+    }
+    function logout() { localStorage.clear(); window.location.href = '../login.html'; }
+</script>
+</body>
+</html>

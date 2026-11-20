@@ -1,0 +1,23 @@
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Java / Maven
+backend/target/
+*.class
+
+# 运行时产生的文件
+backend/uploads/
+*.log
+
+# 前端依赖
+node_modules/
+
+# 环境与敏感信息
+.env
+*.local
+
+# 系统文件
+Thumbs.db
+.DS_Store

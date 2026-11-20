@@ -1,0 +1,62 @@
+<!-- frontend/pages/user/animal-detail.html -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>动物详情</title>
+    <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<div class="header">
+    <h2>🐾 动物详情</h2>
+    <div class="user-info">
+        <span id="username-display"></span>
+        <button onclick="logout()">退出</button>
+    </div>
+</div>
+<div class="container">
+    <button style="margin-bottom:15px; padding:8px 20px; cursor:pointer; border-radius:4px; border:1px solid #ddd;" onclick="history.back()">← 返回</button>
+    <div class="detail-box" id="detail-box"></div>
+    <button style="margin-bottom:20px; padding:10px 25px; background:#e67e22; color:#fff; border:none; border-radius:4px; cursor:pointer;" onclick="goPublish()">✏️ 发布打卡</button>
+    <div class="timeline"><h3>📋 近况时间轴</h3><div id="timeline-list"></div></div>
+</div>
+<script>
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user || user.role !== 'USER') { window.location.href = '../login.html'; }
+    document.getElementById('username-display').textContent = '👤 ' + user.username;
+    const authHeader = { 'Authorization': 'Basic ' + btoa(user.username + ':123456') };
+
+    const params = new URLSearchParams(window.location.search);
+    const animalId = params.get('id');
+
+    fetch(`http://localhost:8080/api/animals/${animalId}`, { headers: authHeader })
+        .then(res => res.json())
+        .then(d => {
+            const a = d.data;
+            document.getElementById('detail-box').innerHTML = `
+                <img src="http://localhost:8080${a.coverImage || ''}" alt="${a.name}" onerror="this.style.display='none'" style="max-width:300px; border-radius:5px;">
+                <h2>${a.name} ${a.type === 'CAT' ? '🐱' : '🐶'}</h2>
+                <p>📍 常驻区域：${a.area || '未知'}</p>
+                <p>🕐 录入时间：${a.createTime ? a.createTime.substring(0,10) : ''}</p>
+            `;
+        });
+
+    fetch(`http://localhost:8080/api/animals/${animalId}/check-ins`, { headers: authHeader })
+        .then(res => res.json())
+        .then(d => {
+            document.getElementById('timeline-list').innerHTML = d.data.length === 0
+                ? '<p style="color:#999;">暂无打卡记录</p>'
+                : d.data.map(c => `
+                    <div class="timeline-item">
+                        <div class="time">🕐 ${c.createTime ? c.createTime.substring(0,16).replace('T',' ') : ''} | 👤 ${c.user ? c.user.username : ''}</div>
+                        <div class="content">${c.content}</div>
+                    </div>
+                `).join('');
+        });
+
+    function goPublish() { window.location.href = `checkin-publish.html?animalId=${animalId}`; }
+    function logout() { localStorage.clear(); window.location.href = '../login.html'; }
+</script>
+</body>
+</html>

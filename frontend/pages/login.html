@@ -1,0 +1,67 @@
+<!-- frontend/pages/login.html -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>校园流浪动物图鉴 - 登录</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div class="login-container">
+    <h1>🐾 校园流浪动物图鉴</h1>
+    <div class="login-box">
+        <h2 id="form-title">用户登录</h2>
+        <input type="text" id="username" placeholder="用户名" autocomplete="off">
+        <input type="password" id="password" placeholder="密码">
+        <button onclick="handleSubmit()" id="submit-btn">登 录</button>
+        <p id="error-msg"></p>
+        <p style="margin-top:10px; font-size:14px; color:#666;">
+            <span id="toggle-text">没有账号？</span>
+            <a href="javascript:void(0)" onclick="toggleMode()" style="color:#e67e22;" id="toggle-link">立即注册</a>
+        </p>
+    </div>
+</div>
+<script>
+    let isLogin = true;
+
+    function toggleMode() {
+        isLogin = !isLogin;
+        document.getElementById('form-title').textContent = isLogin ? '用户登录' : '用户注册';
+        document.getElementById('submit-btn').textContent = isLogin ? '登 录' : '注 册';
+        document.getElementById('toggle-text').textContent = isLogin ? '没有账号？' : '已有账号？';
+        document.getElementById('toggle-link').textContent = isLogin ? '立即注册' : '去登录';
+        document.getElementById('error-msg').textContent = '';
+    }
+
+    function handleSubmit() {
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const errorMsg = document.getElementById('error-msg');
+        errorMsg.textContent = '';
+
+        const url = isLogin ? '/api/auth/login' : '/api/auth/register';
+
+        fetch('http://localhost:8080' + url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.code === 200) {
+                    localStorage.setItem('user', JSON.stringify(data.data));
+                    if (data.data.role === 'ADMIN') {
+                        window.location.href = 'admin/animal-manage.html';
+                    } else {
+                        window.location.href = 'user/animal-list.html';
+                    }
+                } else {
+                    errorMsg.textContent = data.message;
+                }
+            })
+            .catch(() => errorMsg.textContent = '网络错误，请重试');
+    }
+</script>
+</body>
+</html>

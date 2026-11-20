@@ -1,0 +1,23 @@
+# backend/src/main/resources/application.yml
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/campus_stray_animal?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: root
+    password: mysql20050818Ccx@
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  servlet:
+    multipart:
+      max-file-size: 10MB
+  sql:
+    init:
+      mode: always
+
+file:
+  upload-dir: ./uploads
