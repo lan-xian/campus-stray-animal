@@ -1,23 +1,30 @@
-# backend/src/main/resources/application.yml
 server:
   port: 8080
 
 spring:
+  # 默认激活 local profile（读 application-local.yml，该文件不提交到 GitHub）
+  profiles:
+    default: local
   datasource:
     url: jdbc:mysql://localhost:3306/campus_stray_animal?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
-    username: root
-    password: mysql20050818Ccx@
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
   servlet:
     multipart:
       max-file-size: 10MB
   sql:
     init:
-      mode: always
+      mode: never
 
 file:
   upload-dir: ./uploads
+
+jwt:
+  # 生产环境通过环境变量 JWT_SECRET 注入（至少 32 字符）
+  secret: ${JWT_SECRET:change-me-in-production-0123456789abcdef}
+  expiration-ms: 86400000

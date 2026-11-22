@@ -5,6 +5,7 @@ import com.campus.strayanimal.common.Result;
 import com.campus.strayanimal.dto.AnimalRequest;
 import com.campus.strayanimal.entity.Animal;
 import com.campus.strayanimal.service.AnimalService;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,7 +21,7 @@ public class AnimalController {
     }
 
     @PostMapping
-    public Result<Animal> create(@RequestPart("data") AnimalRequest request,
+    public Result<Animal> create(@Valid @RequestPart("data") AnimalRequest request,
                                  @RequestPart(value = "file", required = false) MultipartFile file) {
         Animal animal = new Animal();
         animal.setName(request.getName());
@@ -31,7 +32,7 @@ public class AnimalController {
 
     @PutMapping("/{id}")
     public Result<Animal> update(@PathVariable Long id,
-                                 @RequestPart("data") AnimalRequest request,
+                                 @Valid @RequestPart("data") AnimalRequest request,
                                  @RequestPart(value = "file", required = false) MultipartFile file) {
         Animal animal = new Animal();
         animal.setName(request.getName());

@@ -1,4 +1,1 @@
-INSERT INTO t_user (username, password, role, create_time) VALUES
-                                                               ('admin', '123456', 'ADMIN', NOW()),
-                                                               ('user1', '123456', 'USER', NOW())
-    ON DUPLICATE KEY UPDATE username=username;
+-- 种子数据由 DataInitializer 在启动时以 BCrypt 加密方式初始化，此处仅保留表结构初始化占位

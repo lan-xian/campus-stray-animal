@@ -1,9 +1,8 @@
-// backend/src/main/java/com/campus/strayanimal/service/AuthService.java
 package com.campus.strayanimal.service;
 
-import com.campus.strayanimal.entity.User;
+import com.campus.strayanimal.dto.LoginResponse;
 
 public interface AuthService {
-    User login(String username, String password);
-    User register(String username, String password);
+    LoginResponse.LoginResult login(String username, String password);
+    LoginResponse.LoginResult register(String username, String password);
 }

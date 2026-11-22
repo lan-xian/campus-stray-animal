@@ -17,7 +17,9 @@ node_modules/
 # 环境与敏感信息
 .env
 *.local
+backend/src/main/resources/application-local.yml
 
 # 系统文件
 Thumbs.db
 .DS_Store
+.trae-html-share-packages/
