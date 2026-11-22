@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>发布打卡</title>
     <link rel="stylesheet" href="../../css/style.css">
+    <script src="../../js/common.js"></script>
 </head>
 <body>
 <div class="header">
@@ -31,14 +32,13 @@
     const user = JSON.parse(localStorage.getItem('user'));
     if (!user || user.role !== 'USER') { window.location.href = '../login.html'; }
     document.getElementById('username-display').textContent = '👤 ' + user.username;
-    const authHeader = { 'Authorization': 'Basic ' + btoa(user.username + ':123456') };
 
     const params = new URLSearchParams(window.location.search);
     const preAnimalId = params.get('animalId');
 
-    fetch(`http://localhost:8080/api/animals?size=100`, { headers: authHeader })
-        .then(res => res.json())
+    apiFetch(`/api/animals?size=100`)
         .then(d => {
+            if (!d) return;
             const select = document.getElementById('animal-select');
             select.innerHTML = d.data.content.map(a =>
                 `<option value="${a.id}" ${a.id == preAnimalId ? 'selected' : ''}>${a.name} (${a.type === 'CAT' ? '猫' : '狗'} - ${a.area || ''})</option>`
@@ -49,16 +49,13 @@
         const animalId = document.getElementById('animal-select').value;
         const content = document.getElementById('content').value;
         if (!content.trim()) { document.getElementById('msg').textContent = '请输入打卡内容'; return; }
-        fetch('http://localhost:8080/api/check-ins', {
+        apiFetch('/api/check-ins', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': authHeader['Authorization']
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ animalId: Number(animalId), userId: user.id, content })
         })
-            .then(res => res.json())
             .then(d => {
+                if (!d) return;
                 if (d.code === 200) {
                     window.location.href = `animal-detail.html?id=${animalId}`;
                 } else {
@@ -66,7 +63,6 @@
                 }
             });
     }
-    function logout() { localStorage.clear(); window.location.href = '../login.html'; }
 </script>
 </body>
 </html>

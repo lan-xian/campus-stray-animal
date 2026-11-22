@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>动物详情</title>
     <link rel="stylesheet" href="../../css/style.css">
+    <script src="../../js/common.js"></script>
 </head>
 <body>
 <div class="header">
@@ -25,14 +26,13 @@
     const user = JSON.parse(localStorage.getItem('user'));
     if (!user || user.role !== 'USER') { window.location.href = '../login.html'; }
     document.getElementById('username-display').textContent = '👤 ' + user.username;
-    const authHeader = { 'Authorization': 'Basic ' + btoa(user.username + ':123456') };
 
     const params = new URLSearchParams(window.location.search);
     const animalId = params.get('id');
 
-    fetch(`http://localhost:8080/api/animals/${animalId}`, { headers: authHeader })
-        .then(res => res.json())
+    apiFetch(`/api/animals/${animalId}`)
         .then(d => {
+            if (!d) return;
             const a = d.data;
             document.getElementById('detail-box').innerHTML = `
                 <img src="http://localhost:8080${a.coverImage || ''}" alt="${a.name}" onerror="this.style.display='none'" style="max-width:300px; border-radius:5px;">
@@ -42,9 +42,9 @@
             `;
         });
 
-    fetch(`http://localhost:8080/api/animals/${animalId}/check-ins`, { headers: authHeader })
-        .then(res => res.json())
+    apiFetch(`/api/animals/${animalId}/check-ins`)
         .then(d => {
+            if (!d) return;
             document.getElementById('timeline-list').innerHTML = d.data.length === 0
                 ? '<p style="color:#999;">暂无打卡记录</p>'
                 : d.data.map(c => `
@@ -56,7 +56,6 @@
         });
 
     function goPublish() { window.location.href = `checkin-publish.html?animalId=${animalId}`; }
-    function logout() { localStorage.clear(); window.location.href = '../login.html'; }
 </script>
 </body>
 </html>

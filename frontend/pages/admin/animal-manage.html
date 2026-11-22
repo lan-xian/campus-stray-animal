@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>档案管理</title>
     <link rel="stylesheet" href="../../css/style.css">
+    <script src="../../js/common.js"></script>
 </head>
 <body>
 <div class="header">
@@ -33,16 +34,15 @@
     const user = JSON.parse(localStorage.getItem('user'));
     if (!user || user.role !== 'ADMIN') { window.location.href = '../login.html'; }
     document.getElementById('username-display').textContent = '👤 ' + user.username;
-    const authHeader = { 'Authorization': 'Basic ' + btoa(user.username + ':123456') };
 
     let page = 0;
     function search(p = 0) { page = p; loadAnimals(); }
     function loadAnimals() {
         const name = document.getElementById('search-name').value;
         const type = document.getElementById('filter-type').value;
-        fetch(`http://localhost:8080/api/animals?name=${name}&type=${type}&page=${page}&size=6`, { headers: authHeader })
-            .then(res => res.json())
+        apiFetch(`/api/animals?name=${name}&type=${type}&page=${page}&size=6`)
             .then(data => {
+                if (!data) return;
                 const list = document.getElementById('card-list');
                 list.innerHTML = data.data.content.map(a => `
                     <div class="card">
@@ -73,11 +73,9 @@
     function editAnimal(id) { window.location.href = `animal-add.html?id=${id}`; }
     function deleteAnimal(id) {
         if (!confirm('确认删除该动物档案？')) return;
-        fetch(`http://localhost:8080/api/animals/${id}`, { method: 'DELETE', headers: authHeader })
-            .then(res => res.json())
-            .then(d => { if (d.code === 200) loadAnimals(); else alert(d.message); });
+        apiFetch(`/api/animals/${id}`, { method: 'DELETE' })
+            .then(d => { if (d && d.code === 200) loadAnimals(); else if (d) alert(d.message); });
     }
-    function logout() { localStorage.clear(); window.location.href = '../login.html'; }
     loadAnimals();
 </script>
 </body>
