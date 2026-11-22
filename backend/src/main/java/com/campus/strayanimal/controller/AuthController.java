@@ -1,11 +1,10 @@
-// backend/src/main/java/com/campus/strayanimal/controller/AuthController.java
 package com.campus.strayanimal.controller;
 
 import com.campus.strayanimal.common.Result;
 import com.campus.strayanimal.dto.LoginRequest;
 import com.campus.strayanimal.dto.LoginResponse;
-import com.campus.strayanimal.entity.User;
 import com.campus.strayanimal.service.AuthService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,14 +18,14 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public Result<LoginResponse> login(@RequestBody LoginRequest request) {
-        User user = authService.login(request.getUsername(), request.getPassword());
-        return Result.success(new LoginResponse(user.getId(), user.getUsername(), user.getRole()));
+    public Result<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
+        LoginResponse.LoginResult r = authService.login(request.getUsername(), request.getPassword());
+        return Result.success(new LoginResponse(r.id(), r.username(), r.role(), r.token()));
     }
 
     @PostMapping("/register")
-    public Result<LoginResponse> register(@RequestBody LoginRequest request) {
-        User user = authService.register(request.getUsername(), request.getPassword());
-        return Result.success(new LoginResponse(user.getId(), user.getUsername(), user.getRole()));
+    public Result<LoginResponse> register(@Valid @RequestBody LoginRequest request) {
+        LoginResponse.LoginResult r = authService.register(request.getUsername(), request.getPassword());
+        return Result.success(new LoginResponse(r.id(), r.username(), r.role(), r.token()));
     }
 }

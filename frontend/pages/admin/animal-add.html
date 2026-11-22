@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title id="page-title">新增动物档案</title>
     <link rel="stylesheet" href="../../css/style.css">
+    <script src="../../js/common.js"></script>
 </head>
 <body>
 <div class="header">
@@ -41,7 +42,6 @@
     const user = JSON.parse(localStorage.getItem('user'));
     if (!user || user.role !== 'ADMIN') { window.location.href = '../login.html'; }
     document.getElementById('username-display').textContent = '👤 ' + user.username;
-    const authHeader = { 'Authorization': 'Basic ' + btoa(user.username + ':123456') };
 
     const params = new URLSearchParams(window.location.search);
     const editId = params.get('id');
@@ -50,9 +50,9 @@
     if (isEdit) {
         document.getElementById('page-title').textContent = '编辑动物档案';
         document.getElementById('header-title').textContent = '编辑动物档案';
-        fetch(`http://localhost:8080/api/animals/${editId}`, { headers: authHeader })
-            .then(res => res.json())
+        apiFetch(`/api/animals/${editId}`)
             .then(d => {
+                if (!d) return;
                 const a = d.data;
                 document.getElementById('name').value = a.name;
                 document.getElementById('type').value = a.type;
@@ -86,12 +86,12 @@
             formData.append('file', fileInput.files[0]);
         }
 
-        const url = isEdit ? `http://localhost:8080/api/animals/${editId}` : 'http://localhost:8080/api/animals';
+        const url = isEdit ? `/api/animals/${editId}` : '/api/animals';
         const method = isEdit ? 'PUT' : 'POST';
 
-        fetch(url, { method, body: formData, headers: authHeader })
-            .then(res => res.json())
+        apiFetch(url, { method, body: formData })
             .then(d => {
+                if (!d) return;
                 if (d.code === 200) {
                     window.location.href = 'animal-manage.html';
                 } else {
@@ -99,7 +99,6 @@
                 }
             });
     }
-    function logout() { localStorage.clear(); window.location.href = '../login.html'; }
 </script>
 </body>
 </html>

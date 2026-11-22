@@ -10,6 +10,11 @@ import java.util.List;
 @Entity
 @Table(name = "t_animal", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"name", "type"})
+}, indexes = {
+        // 列表页常见查询：按类型筛选并按创建时间倒序分页
+        @Index(name = "idx_type_create_time", columnList = "type, create_time"),
+        // 名称模糊搜索的前缀匹配索引
+        @Index(name = "idx_name", columnList = "name")
 })
 @Data
 public class Animal {
